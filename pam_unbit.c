@@ -13,7 +13,7 @@
 #define UNUSED __attribute__ ((unused))
 
 #define UNBIT_MIN_UID 30000
-#define UNBIT_EMPEROR_NS "/run/unbit/"
+#define UNBIT_EMPEROR_HOME_NS "/containers/"
 #define UNBIT_EMPEROR_MAX_NS 64
 
 int *emperor_ns_attach_fds(int fd) {
@@ -108,7 +108,7 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 			- on error deny access
 	*/
 
-	ret = snprintf(filename, 102, UNBIT_EMPEROR_NS "%s/ns.socket", account);
+	ret = snprintf(filename, 102, UNBIT_EMPEROR_HOME_NS "%s/run/ns.socket", account);
 	if (ret <= 0 || ret > 102) {
 		return PAM_PERM_DENIED;
 	}
