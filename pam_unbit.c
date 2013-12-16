@@ -102,7 +102,7 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 
 	/*
 		steps:
-			- connect to /run/unbit/emperors/<uid>/ns.socket
+			- connect to /run/unbit/<uid>/ns.socket
 			- receive fds
 			- call setns for each one
 			- on error deny access
