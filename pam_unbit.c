@@ -13,7 +13,7 @@
 #define UNUSED __attribute__ ((unused))
 
 #define UNBIT_MIN_UID 30000
-#define UNBIT_EMPEROR_NS "/run/unbit/emperors/"
+#define UNBIT_EMPEROR_NS "/run/unbit/"
 #define UNBIT_EMPEROR_MAX_NS 64
 
 int *emperor_ns_attach_fds(int fd) {
