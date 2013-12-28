@@ -10,11 +10,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #define UNUSED __attribute__ ((unused))
 
 #define UNBIT_MIN_UID 30000
 #define UNBIT_EMPEROR_HOME_NS "/containers/"
 #define UNBIT_EMPEROR_MAX_NS 64
+#define UNBIT_EMPEROR_CGROUP "/sys/fs/cgroup/"
 
 int *emperor_ns_attach_fds(int fd) {
 
@@ -99,6 +101,26 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 	if (pwd->pw_uid < UNBIT_MIN_UID) {
                 return PAM_SUCCESS;
         }
+
+	ret = snprintf(filename, 102, UNBIT_EMPEROR_CGROUP "%s/tasks", account);
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+	int cgroup = open(filename, O_WRONLY);
+	if (cgroup < 0) {
+		pam_syslog(pamh, LOG_CRIT, "[unbit] no cgroup");
+		return PAM_PERM_DENIED;
+	}
+	ret = snprintf(filename, 102, "%d\n", (int) getpid());
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+	if (write(cgroup, filename, ret) != ret) {
+		pam_syslog(pamh, LOG_CRIT, "[unbit] error joining cgroup");
+		close(cgroup);
+		return PAM_PERM_DENIED;
+	}
+	close(cgroup);
 
 	/*
 		steps:
