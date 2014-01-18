@@ -153,6 +153,7 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 	if (connect(fd, (struct sockaddr *)&sun, sizeof(struct sockaddr_un))) {
 		pam_syslog(pamh, LOG_CRIT, "[unbit] connect() failed for %s: %s\n", account, strerror(errno));
 		close(fd);
+		fprintf(stdout, "The Emperor says: container %s is still booting...\n", account);
                 return PAM_PERM_DENIED;
 	}
 
