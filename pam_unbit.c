@@ -212,6 +212,22 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 
 	free(fds);
 	if (!applied) return PAM_PERM_DENIED;
+
+	// hack for supporting /var/run/utmp
+	pid_t pid = fork();
+	if (pid > 0) {
+		int status = 0;
+		waitpid(pid, &status, 0);	
+		exit(0);
+	}
+	else if (pid < 0) {
+		pam_syslog(pamh, LOG_CRIT, "[unbit] fork() failed for %s: %s\n", account, strerror(errno));
+                return PAM_PERM_DENIED;
+	}
+	// ensure /var/run/utmp is available
+	if (open("/var/run/utmp", O_EXCL|O_CREAT, 0644) >= 0) {
+		pam_syslog(pamh, LOG_NOTICE, "[unbit] created %s%s/var/run/utmp", UNBIT_EMPEROR_HOME_NS, account);
+	}
         return PAM_SUCCESS;
 }
 
