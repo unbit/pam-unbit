@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h>
 #include <syslog.h>
 #include <pam_modules.h>
@@ -11,6 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sched.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <syslog.h>
+#include <security/pam_ext.h>
 #define UNUSED __attribute__ ((unused))
 
 #define UNBIT_MIN_UID 30000
