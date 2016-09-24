@@ -22,7 +22,7 @@
 #define UNBIT_MIN_UID 30000
 #define UNBIT_EMPEROR_HOME_NS "/containers/"
 #define UNBIT_EMPEROR_MAX_NS 64
-#define UNBIT_EMPEROR_CGROUP "/sys/fs/cgroup/"
+#define UNBIT_EMPEROR_CGROUP "/sys/fs/cgroup/cpu/"
 
 int *emperor_ns_attach_fds(int fd) {
 
