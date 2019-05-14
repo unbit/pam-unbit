@@ -108,6 +108,47 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
                 return PAM_SUCCESS;
         }
 
+#ifdef ON_SYSTEMD
+	ret = snprintf(filename, 102, UNBIT_EMPEROR_CGROUP "cpu/%s/tasks", account);
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+	int cgroup = open(filename, O_WRONLY);
+	if (cgroup < 0) {
+		pam_syslog(pamh, LOG_CRIT, "[unbit] no cpu cgroup");
+		return PAM_PERM_DENIED;
+	}
+	ret = snprintf(filename, 102, "%d\n", (int) getpid());
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+	if (write(cgroup, filename, ret) != ret) {
+		pam_syslog(pamh, LOG_CRIT, "[unbit] error joining cpu cgroup");
+		close(cgroup);
+		return PAM_PERM_DENIED;
+	}
+	close(cgroup);
+
+	ret = snprintf(filename, 102, UNBIT_EMPEROR_CGROUP "memory/%s/tasks", account);
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+        cgroup = open(filename, O_WRONLY);
+        if (cgroup < 0) {
+                pam_syslog(pamh, LOG_CRIT, "[unbit] no memory cgroup");
+                return PAM_PERM_DENIED;
+        }
+        ret = snprintf(filename, 102, "%d\n", (int) getpid());
+        if (ret <= 0 || ret > 102) {
+                return PAM_PERM_DENIED;
+        }
+        if (write(cgroup, filename, ret) != ret) {
+                pam_syslog(pamh, LOG_CRIT, "[unbit] error joining memory cgroup");
+                close(cgroup);
+                return PAM_PERM_DENIED;
+        }
+        close(cgroup);
+#else
 	ret = snprintf(filename, 102, UNBIT_EMPEROR_CGROUP "%s/tasks", account);
         if (ret <= 0 || ret > 102) {
                 return PAM_PERM_DENIED;
@@ -127,6 +168,7 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags UNUSED, int ar
 		return PAM_PERM_DENIED;
 	}
 	close(cgroup);
+#endif
 
 	/*
 		steps:
